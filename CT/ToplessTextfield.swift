@@ -1,11 +1,10 @@
 //
 //  ToplessTextfield.swift
-//  SpaceIn
+//  CT
 //
-//  Created by Richard Velazquez on 12/8/16.
-//  Copyright © 2016 Ricky. All rights reserved.
+//  Created by John Nik on 4/6/17.
+//  Copyright © 2017 johnik703. All rights reserved.
 //
-
 //        let testTextfield = ToplessTextField(frame: CGRect(x: 20, y: 20, width: 100, height: 60))
 //        self.view.addSubview(testTextfield)
 //******** the above has the line in the right place. We ay need to make the y a calculated value

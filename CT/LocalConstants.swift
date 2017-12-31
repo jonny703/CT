@@ -1,9 +1,9 @@
 //
 //  Constants.swift
-//  LendSystem
+//  CT
 //
-//  Created by PAC on 4/5/17.
-//  Copyright © 2017 PAC. All rights reserved.
+//  Created by John Nik on 4/6/17.
+//  Copyright © 2017 johnik703. All rights reserved.
 //
 
 import Foundation
@@ -15,6 +15,7 @@ let User_Image_Radius: CGFloat = DEVICE_WIDTH * 0.16
 let DEVICE_WIDTH = UIScreen.main.bounds.size.width
 let DEVICE_HEIGHT = UIScreen.main.bounds.size.height
 
+let defaults = UserDefaults.standard
 
 let TextField_Width: CGFloat = 200
 
@@ -31,8 +32,3 @@ enum RequestStatus {
     case Second
 }
 
-enum ProfileControllerStatus {
-    case Signup
-    case Update
-    case Photo
-}

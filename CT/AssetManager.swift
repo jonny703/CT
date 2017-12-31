@@ -1,43 +1,52 @@
 //
 //  AssetManager.swift
-//  SpaceIn
+//  CT
 //
-//  Created by Richard Velazquez on 12/8/16.
-//  Copyright © 2016 Ricky. All rights reserved.
+//  Created by John Nik on 4/6/17.
+//  Copyright © 2017 johnik703. All rights reserved.
 //
 
 import Foundation
 import UIKit
 
 enum AssetName: String {
-    case logoWhite = "logoWhite"
-    case logoColored = "logoColored"
-    case loginBackground = "loginBackground"
-    case signUpButtonGradient = "gradientGreen"
-    case transparentPin = "mapProfile"
-    case spaceinGradient = "gradient"
-    case brokenPin = "brokenGPS"
-    case greenCircle = "greenCircle"
-    case threeDCircle = "3dglasses"
-    case locationIcon = "locationIcon"
-    case notification = "notification"
-    case zoomIn = "zoomIn"
-    case zoomOut = "zooomOut"
-    case profilePlaceholder = "profilePlaceHolder"
-    case dismissButton = "dismissButton"
-    case settingsButton = "settingsButton"
-    case rickySquare = "rickySquare"
-    case profileLocation = "profileLocation"
-    case jobIcon = "jobIcon"
-    case locationdot = "locationdot"
-    case compass = "compass"
-    case mapProfileIcon = "mapProfileIcon"
-    case backButton = "backbutton"
-    case plusButton = "plusButton"
+    
+    
+    case itunesArtwork = "iTunesArtwork"
+    case icStreamMore = "ic_stream_more"
+    case icStream = "ic_stream"
+    case icInbox = "ic_inbox"
+    case icTvDark = "ic_tv"
+    case icNotification = "ic_notification"
+    case arrowUp = "arrow_up"
+    case arrowDown = "arrow_down"
+    case addPost = "addPost"
     case sendButton = "sendButton"
-    case playButton = "playbutton_image"
-    case dismissX = "dismissX"
-    case statusIcon = "statusIcon"
+    case addPhoto = "addPhoto"
+    case addPhotos = "addPhotos"
+    case close = "close"
+    case addUser = "addUser"
+    case playIcon = "playbutton_image"
+    case logo = "logo"
+    case plusIcon = "plusIcon"
+    case more = "more"
+    case cancel = "cancel"
+    case leftArrow = "left-arrow"
+    case alarm = "alarm"
+    case search = "search"
+    case emoticonLove = "emoticon_love"
+    case emoticonSad = "emoticon_sad"
+    case emoticonLike = "emoticon_like"
+    case emoticonAngry = "emoticon_angry"
+    case emoticonHappy = "emoticon_happy"
+    case emoticonConfused = "emoticon_confused"
+    
+    case likeActive = "like_actived"
+    case likeInactive = "like_inactive-1"
+    case comment = "comment"
+    
+    case follow = "follow"
+    case unfollow = "unfollow"
 }
 
 class AssetManager {

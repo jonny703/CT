@@ -1,9 +1,9 @@
 //
 //  ChatMessageCell.swift
-//  gameofchats
+//  CT
 //
-//  Created by PAC on 4/6/17.
-//  Copyright © 2017 PAC. All rights reserved.
+//  Created by John Nik on 4/6/17.
+//  Copyright © 2017 johnik703. All rights reserved.
 //
 
 import UIKit
@@ -11,7 +11,7 @@ import AVFoundation
 
 class ChatMessageCell: UICollectionViewCell {
     
-    var chatLogController: ChatLogController?
+    var oneToOneChatController: OneToOneChatController?
     
     var message: Message?
     
@@ -27,13 +27,10 @@ class ChatMessageCell: UICollectionViewCell {
     lazy var playButton: UIButton = {
         
         let button = UIButton(type: UIButtonType.system)
-        let image = UIImage(named: "playbutton_image")
+        let image = UIImage(named: AssetName.playIcon.rawValue)
         button.setBackgroundImage(image, for: .normal)
-//        button.setTitle("play", for: .normal)
         button.translatesAutoresizingMaskIntoConstraints = false
-        
         button.addTarget(self, action: #selector(handlePlay), for: .touchUpInside)
-
         return button
         
     }()
@@ -42,8 +39,8 @@ class ChatMessageCell: UICollectionViewCell {
     var player: AVPlayer?
     
     func handlePlay() {
-        
-        if let videoUrlString = message?.videoUrl, let url = URL(string: videoUrlString) {
+        let videoUrlString = message?.videoUrl
+        if videoUrlString != "", let url = URL(string: videoUrlString!) {
             
             player = AVPlayer(url: url)
             
@@ -68,6 +65,9 @@ class ChatMessageCell: UICollectionViewCell {
     override func prepareForReuse() {
         
         super.prepareForReuse()
+        
+        self.profileImageView.image = nil
+        
         playerLayer?.removeFromSuperlayer()
         player?.pause()
         activityIndicatorView.stopAnimating()
@@ -77,7 +77,7 @@ class ChatMessageCell: UICollectionViewCell {
     let textView: UITextView = {
         
         let tv = UITextView()
-        tv.text = "sdfs"
+        tv.text = ""
         tv.font = UIFont.systemFont(ofSize: 16)
         tv.translatesAutoresizingMaskIntoConstraints = false
         tv.backgroundColor = UIColor.clear
@@ -94,7 +94,8 @@ class ChatMessageCell: UICollectionViewCell {
         let view = UIView()
         view.backgroundColor = blueColor
         view.translatesAutoresizingMaskIntoConstraints = false
-        view.layer.cornerRadius = 16
+//        view.reoundCorners(corners: [.bottomLeft, .bottomRight, .topLeft], radius: 10)
+        view.layer.cornerRadius = 10
         view.layer.masksToBounds = true
         return view
         
@@ -104,47 +105,51 @@ class ChatMessageCell: UICollectionViewCell {
     let profileImageView: UIImageView = {
         
         let imageView = UIImageView()
-        imageView.image = UIImage(named: "basketball.jpeg")
+        imageView.image = UIImage(named: AssetName.itunesArtwork.rawValue)
         imageView.translatesAutoresizingMaskIntoConstraints = false
-        imageView.layer.cornerRadius = 16
+        imageView.layer.cornerRadius = 3
         imageView.layer.masksToBounds = true
         imageView.contentMode = .scaleAspectFill
         return imageView
+
         
     }()
+    
+    let timeLabel: UILabel = {
+        let label = UILabel()
+        label.text = "23:34 AM"
+        label.textColor = .black
+        label.textAlignment = .left
+        label.font = UIFont.systemFont(ofSize: 13)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+
     
     lazy var messageImageView: UIImageView = {
         
         let imageView = UIImageView()
-//        imageView.image = UIImage(named: "basketball.jpeg")
         imageView.translatesAutoresizingMaskIntoConstraints = false
-        imageView.layer.cornerRadius = 16
+        imageView.layer.cornerRadius = 10
         imageView.layer.masksToBounds = true
         imageView.contentMode = .scaleAspectFill
-//        imageView.backgroundColor = UIColor.brown
-        
         imageView.isUserInteractionEnabled = true
-        
         imageView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(handleZoomTap)))
-        
         return imageView
         
     }()
     
     func handleZoomTap(tapGesture: UITapGestureRecognizer) {
         
-        if message?.videoUrl != nil {
+        if message?.videoUrl != "" {
             return
         }
         
         if let imageView = tapGesture.view as? UIImageView {
             
             //PRO Tip: don't perform a lot of custom logic inside of a view class
-            self.chatLogController?.performZoomingForStartingImageView(startingImageView: imageView)
-            
+            self.oneToOneChatController?.performZoomingForStartingImageView(startingImageView: imageView)
         }
-        
-        
     }
     
     var bubbleWidthAncher: NSLayoutConstraint?
@@ -158,6 +163,7 @@ class ChatMessageCell: UICollectionViewCell {
         addSubview(bubbleView)
         addSubview(textView)
         addSubview(profileImageView)
+        addSubview(timeLabel)
         
         bubbleView.addSubview(messageImageView)
         
@@ -182,7 +188,7 @@ class ChatMessageCell: UICollectionViewCell {
         
         
         profileImageView.leftAnchor.constraint(equalTo: self.leftAnchor, constant: 8).isActive = true
-        profileImageView.bottomAnchor.constraint(equalTo: self.bottomAnchor).isActive = true
+        profileImageView.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -20).isActive = true
         profileImageView.widthAnchor.constraint(equalToConstant: 32).isActive = true
         profileImageView.heightAnchor.constraint(equalToConstant: 32).isActive = true
         
@@ -195,15 +201,18 @@ class ChatMessageCell: UICollectionViewCell {
         bubbleView.topAnchor.constraint(equalTo: self.topAnchor).isActive = true
         bubbleWidthAncher = bubbleView.widthAnchor.constraint(equalToConstant: 200)
         bubbleWidthAncher?.isActive = true
-        bubbleView.heightAnchor.constraint(equalTo: self.heightAnchor).isActive = true
+        bubbleView.heightAnchor.constraint(equalTo: self.heightAnchor, constant: -20).isActive = true
         
-//        textView.rightAnchor.constraint(equalTo: self.rightAnchor).isActive = true
         textView.leftAnchor.constraint(equalTo: bubbleView.leftAnchor, constant: 8).isActive = true
         textView.topAnchor.constraint(equalTo: self.topAnchor).isActive = true
-        
         textView.rightAnchor.constraint(equalTo: bubbleView.rightAnchor).isActive = true
-//        textView.widthAnchor.constraint(equalToConstant: 200).isActive = true
         textView.heightAnchor.constraint(equalTo: bubbleView.heightAnchor).isActive = true
+        
+        
+        timeLabel.rightAnchor.constraint(equalTo: self.rightAnchor, constant: -8).isActive = true
+        timeLabel.leftAnchor.constraint(equalTo: self.leftAnchor, constant: 8).isActive = true
+        timeLabel.heightAnchor.constraint(equalToConstant: 20).isActive = true
+        timeLabel.bottomAnchor.constraint(equalTo: self.bottomAnchor).isActive = true
         
     }
     

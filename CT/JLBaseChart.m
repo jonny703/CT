@@ -32,7 +32,7 @@
     _signedValue = YES;
     //    _yLabelFormat = @"%.2f";
     _yLabelSuffix = @"";
-    _stepCount = 10;
+    _stepCount = 8;
     
     _chartMarginLeft = 10.0f;
     _chartMarginRight = 10.0f;

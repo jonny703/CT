@@ -2,12 +2,13 @@
 //  ChartGraph.swift
 //  CT
 //
-//  Created by PAC on 8/10/17.
-//  Copyright © 2017 PAC. All rights reserved.
+//  Created by John Nik on 4/6/17.
+//  Copyright © 2017 johnik703. All rights reserved.
 //
 
 import UIKit
 
 class ChartGraph: NSObject {
-
+    var amount: String?
+    var date: String?
 }

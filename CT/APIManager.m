@@ -8,6 +8,7 @@
 
 #import "APIManager.h"
 #import "AFNetworking.h"
+#import "APIConstant.h"
 
 NSString *errorMessage = @"Something went wrong";
 
@@ -96,6 +97,17 @@ static APIManager *singleton = nil;
 
 #pragma mark - Helpers
 
+- (void)getChartsListWithUrl:(NSString *)urlStr CompletionHandler:(APICompletionHandlerWithArray)succeedHandler ErrorHandler:(APIErrorHandler)errorHandler {
+    
+    [self executeHTTPRequest:Get url:urlStr parameters:nil CompletionHandler:^(NSDictionary *responseDict) {
+        
+        
+        
+        succeedHandler((NSArray *) responseDict);
+    } ErrorHandler: errorHandler];
+    
+}
+
 - (void) executeHTTPRequest:(NSString *)method url:(NSString *)urlStr headers:(NSDictionary *)headerDic parameters:(NSDictionary *)paramDic CompletionHandler:(APICompletionHandler)succeedHandler ErrorHandler:(APIErrorHandler)errorHandler {
     
     NSString *url = [urlStr stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
@@ -115,45 +127,45 @@ static APIManager *singleton = nil;
     manager.requestSerializer = requestSerializer;
     manager.responseSerializer.acceptableContentTypes = [NSSet setWithObjects:@"application/json", @"text/json", @"text/javascript", @"text/html", nil];
     
-    NSLog(@"URL -- %@",url);
+//    NSLog(@"URL -- %@",url);
     
     if ([method isEqualToString:@"get"]) {
         
         [manager GET:url parameters:paramDic progress:nil success:^(NSURLSessionTask *task, id responseObject) {
-            NSLog(@"JSON: %@", responseObject);
+//            NSLog(@"JSON: %@", responseObject);
             succeedHandler(responseObject);
         } failure:^(NSURLSessionTask *operation, NSError *error) {
-            NSLog(@"Error: %@", error);
+//            NSLog(@"Error: %@", error);
             errorHandler(errorMessage);
         }];
         
     } else if ([method isEqualToString:@"post"]) {
         
         [manager POST:url parameters:paramDic progress:nil success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
-            NSLog(@"JSON: %@", responseObject);
+//            NSLog(@"JSON: %@", responseObject);
             succeedHandler(responseObject);
         } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
-            NSLog(@"Error: %@", error);
+//            NSLog(@"Error: %@", error);
             errorHandler(errorMessage);
         }];
         
     } else if ([method isEqualToString:@"patch"]) {
         
         [manager PATCH:url parameters:paramDic success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
-            NSLog(@"JSON: %@", responseObject);
+//            NSLog(@"JSON: %@", responseObject);
             succeedHandler(responseObject);
         } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
-            NSLog(@"Error: %@", error);
+//            NSLog(@"Error: %@", error);
             errorHandler(errorMessage);
         }];
         
     } else if ([method isEqualToString:@"delete"]) {
         
         [manager DELETE:url parameters:paramDic success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
-            NSLog(@"JSON: %@", responseObject);
+//            NSLog(@"JSON: %@", responseObject);
             succeedHandler(responseObject);
         } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
-            NSLog(@"Error: %@", error);
+//            NSLog(@"Error: %@", error);
             errorHandler(errorMessage);
         }];
     }
@@ -169,47 +181,47 @@ static APIManager *singleton = nil;
     manager.requestSerializer = requestSerializer;
     manager.responseSerializer.acceptableContentTypes = [NSSet setWithObjects:@"application/json", @"text/json", @"text/javascript", @"text/html", nil];
     
-    NSLog(@"URL -- %@",url);
-    NSLog(@"params --- %@", paramDic);
+//    NSLog(@"URL -- %@",url);
+//    NSLog(@"params --- %@", paramDic);
 //    NSLog(@"loginaftersignup---%@,%@", url, paramDic);
     
     if ([method isEqualToString:@"get"]) {
         
         [manager GET:url parameters:paramDic progress:nil success:^(NSURLSessionTask *task, id responseObject) {
-            NSLog(@"JSON: %@", responseObject);
+//            NSLog(@"JSON: %@", responseObject);
             succeedHandler(responseObject);
         } failure:^(NSURLSessionTask *operation, NSError *error) {
-            NSLog(@"Error: %@", error);
+//            NSLog(@"Error: %@", error);
             errorHandler(errorMessage);
         }];
         
     } else if ([method isEqualToString:@"post"]) {
         
         [manager POST:url parameters:paramDic progress:nil success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
-            NSLog(@"JSON: %@", responseObject);
+//            NSLog(@"JSON: %@", responseObject);
             succeedHandler(responseObject);
         } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
-            NSLog(@"Error: %@", error);
+//            NSLog(@"Error: %@", error);
             errorHandler(errorMessage);
         }];
         
     } else if ([method isEqualToString:@"patch"]) {
         
         [manager PATCH:url parameters:paramDic success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
-            NSLog(@"JSON: %@", responseObject);
+//            NSLog(@"JSON: %@", responseObject);
             succeedHandler(responseObject);
         } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
-            NSLog(@"Error: %@", error);
+//            NSLog(@"Error: %@", error);
             errorHandler(errorMessage);
         }];
         
     } else if ([method isEqualToString:@"delete"]) {
         
         [manager DELETE:url parameters:paramDic success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
-            NSLog(@"JSON: %@", responseObject);
+//            NSLog(@"JSON: %@", responseObject);
             succeedHandler(responseObject);
         } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
-            NSLog(@"Error: %@", error);
+//            NSLog(@"Error: %@", error);
             errorHandler(errorMessage);
         }];
     }

@@ -1,9 +1,9 @@
 //
-//  ProfileDetailController.swift
+//  ProfileEditController.swift
 //  CT
 //
-//  Created by PAC on 10/22/17.
-//  Copyright © 2017 PAC. All rights reserved.
+//  Created by John Nik on 4/6/17.
+//  Copyright © 2017 johnik703. All rights reserved.
 //
 
 
@@ -11,7 +11,9 @@ import UIKit
 import Firebase
 import KRProgressHUD
 
-class ProfileDetailController: UIViewController {
+class ProfileEditController: UIViewController {
+    
+    var profileControllerDelegate: ProfileControllerDelegate?
     
     fileprivate var isSelectedPhoto = false
     
@@ -100,55 +102,81 @@ class ProfileDetailController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupViews()
-        fetchUserProfile()
+//        fetchUserProfile()
     }
     
 }
 
 //MARK: fetch user profile
 
-extension ProfileDetailController {
+extension ProfileEditController {
     
     fileprivate func fetchUserProfile() {
         
-        guard let uid = Auth.auth().currentUser?.uid else {
-            return
+//        guard let uid = Auth.auth().currentUser?.uid else {
+//            return
+//        }
+//        let ref = Database.database().reference().child("users").child(uid)
+//        
+//        ref.observeSingleEvent(of: .value, with: { (snapshot) in
+//            
+//            if let dictionary = snapshot.value as? [String: AnyObject] {
+//                
+//                self.usernameTextField.text = dictionary["username"] as? String
+//                self.nameTextField.text = dictionary["fullname"] as? String
+//                self.emailTextField.text = dictionary["email"] as? String
+//                
+//                if let location = dictionary["location"] as? String {
+//                    
+//                    self.locationTextField.text = location
+//                }
+//                
+//                if let bio = dictionary["bio"] as? String {
+//                    
+//                    self.bioTextField.text = bio
+//                }
+//                let profileImageUrl = dictionary["profilePictureURL"] as? String
+//                if profileImageUrl != "" {
+//                    
+//                    self.profileImageView.loadImageUsingCacheWithUrlString(urlString: profileImageUrl!)
+//                }
+//            }
+//        }, withCancel: nil)
+        
+        if let userName = self.ctUser?.username {
+            self.usernameTextField.text = userName
         }
-        let ref = Database.database().reference().child("users").child(uid)
         
-        ref.observeSingleEvent(of: .value, with: { (snapshot) in
-            
-            if let dictionary = snapshot.value as? [String: AnyObject] {
+        if let fullName = self.ctUser?.fullname {
+            self.nameTextField.text = fullName
+        }
+        
+        if let email = self.ctUser?.email {
+            self.emailTextField.text = email
+        }
+        
+        if let location = self.ctUser?.location {
+            self.locationTextField.text = location
+        }
+        
+        if let bio = self.ctUser?.location {
+            self.bioTextField.text = bio
+        }
+        
+        if let profileImageUrl = self.ctUser?.profilePictureURL {
+            if profileImageUrl != "" {
                 
-                self.usernameTextField.text = dictionary["username"] as? String
-                self.nameTextField.text = dictionary["fullname"] as? String
-                self.emailTextField.text = dictionary["email"] as? String
-                
-                if let location = dictionary["location"] as? String {
-                    
-                    self.locationTextField.text = location
-                }
-                
-                if let bio = dictionary["bio"] as? String {
-                    
-                    self.bioTextField.text = bio
-                }
-                let profileImageUrl = dictionary["profilePictureURL"] as? String
-                if profileImageUrl != "" {
-                    
-                    self.profileImageView.loadImageUsingCacheWithUrlString(urlString: profileImageUrl!)
-                }
+                self.profileImageView.loadImageUsingCacheWithUrlString(urlString: profileImageUrl)
             }
-        }, withCancel: nil)
-        
-        
+        }
+
     }
     
 }
 
 //MARK: handle Photo galary
 
-extension ProfileDetailController: UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIPopoverPresentationControllerDelegate {
+extension ProfileEditController: UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIPopoverPresentationControllerDelegate {
     
     func handleSelectProfileImageView() {
         
@@ -278,7 +306,7 @@ extension ProfileDetailController: UIImagePickerControllerDelegate, UINavigation
 
 //MARK: handle update, dismiss controller
 
-extension ProfileDetailController {
+extension ProfileEditController {
     
     func handleUpdate() {
         KRProgressHUD.set(style: .black)
@@ -307,39 +335,40 @@ extension ProfileDetailController {
         
         let storageRef = Storage.storage().reference().child("user_images").child("\(profileImageName)profileImage.jpeg")
         
-        
-        if let profileImageView = self.profileImageView.image {
+        if self.isSelectedPhoto == false {
             
-            var image = profileImageView
-            if profileImageView.size.width > 350 {
-                image = profileImageView.resized(toWidth: 350.0)!
+            let values = ["username": username, "email": email, "fullname": fullname, "location": self.locationTextField.text == nil ? "" : self.locationTextField.text!, "bio": self.bioTextField.text == nil ? "" : self.bioTextField.text! ]
+            
+            self.registerUserIntoDatabaseWithUid(values: values as [String : AnyObject])
+            
+        } else {
+            if let profileImageView = self.profileImageView.image {
                 
-            }
-            if let uploadData = UIImageJPEGRepresentation(image, 0.1) {
-                storageRef.putData(uploadData, metadata: nil, completion: { (metadata, error) in
+                var image = profileImageView
+                if profileImageView.size.width > 350 {
+                    image = profileImageView.resized(toWidth: 350.0)!
                     
-                    if error != nil {
-                        print(error!)
-                        KRProgressHUD.dismiss()
-                        showAlertMessage(vc: self, titleStr: "Something went wrong!", messageStr: "Try again later")
-                        return
-                    }
-                    if var profilePictureURL = metadata?.downloadURL()?.absoluteString {
+                }
+                if let uploadData = UIImageJPEGRepresentation(image, 0.1) {
+                    storageRef.putData(uploadData, metadata: nil, completion: { (metadata, error) in
                         
-                        if self.isSelectedPhoto == false {
-                            profilePictureURL = ""
+                        if error != nil {
+                            print(error!)
+                            KRProgressHUD.dismiss()
+                            showAlertMessage(vc: self, titleStr: "Something went wrong!", messageStr: "Try again later")
+                            return
                         }
-                        
-                        let values = ["username": username, "email": email, "fullname": fullname, "profilePictureURL": profilePictureURL, "location": self.locationTextField.text == nil ? "" : self.locationTextField.text!, "bio": self.bioTextField.text == nil ? "" : self.bioTextField.text! ]
-                        
-                        self.registerUserIntoDatabaseWithUid(values: values as [String : AnyObject])
-                    }
-                })
-                
+                        if let profilePictureURL = metadata?.downloadURL()?.absoluteString {
+                            
+                            let values = ["username": username, "email": email, "fullname": fullname, "profilePictureURL": profilePictureURL, "location": self.locationTextField.text == nil ? "" : self.locationTextField.text!, "bio": self.bioTextField.text == nil ? "" : self.bioTextField.text! ]
+                            
+                            self.registerUserIntoDatabaseWithUid(values: values as [String : AnyObject])
+                        }
+                    })
+                    
+                }
             }
         }
-        
-        
     }
     
     private func registerUserIntoDatabaseWithUid(values: [String: AnyObject]) {
@@ -357,7 +386,12 @@ extension ProfileDetailController {
                 return
             }
             KRProgressHUD.dismiss()
-            self.dismissController()
+            
+            self.dismiss(animated: true, completion: {
+                self.profileControllerDelegate?.resetUserProfile()
+            })
+            
+            
         })
     }
     
@@ -370,7 +404,7 @@ extension ProfileDetailController {
 
 //MARK: check invalid
 
-extension ProfileDetailController {
+extension ProfileEditController {
     fileprivate func checkInvalid() -> Bool {
         
         if (nameTextField.text?.isEmpty)! {
@@ -394,7 +428,7 @@ extension ProfileDetailController {
 
 //MARK: setup Background
 
-extension ProfileDetailController {
+extension ProfileEditController {
     
     fileprivate func setupViews() {
         
@@ -468,7 +502,7 @@ extension ProfileDetailController {
         
         let image = UIImage(named: AssetName.close.rawValue)?.withRenderingMode(.alwaysOriginal)
         self.navigationItem.leftBarButtonItem = UIBarButtonItem(image: image, style: .plain, target: self, action: #selector(dismissController))
-        let updateButton = UIBarButtonItem(title: "Update", style: .plain, target: self, action: #selector(handleUpdate))
+        let updateButton = UIBarButtonItem(title: "Save", style: .plain, target: self, action: #selector(handleUpdate))
         updateButton.tintColor = .white
         self.navigationItem.rightBarButtonItem = updateButton
         

@@ -1,9 +1,9 @@
 //
 //  HADropDown.swift
-//  MyDropDown
+//  CT
 //
-//  Created by Hassan Aftab on 22/02/2017.
-//  Copyright © 2017 Hassan Aftab. All rights reserved.
+//  Created by John Nik on 4/6/17.
+//  Copyright © 2017 johnik703. All rights reserved.
 //
 
 import UIKit
@@ -162,10 +162,6 @@ class HADropDown: UIView {
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        
-//        self.layer.cornerRadius = 4
-//        self.layer.borderColor = UIColor.gray.cgColor
-//        self.layer.borderWidth = 1
         
         label.frame = CGRect(x: 0, y: 0, width: self.frame.width, height: self.frame.height)
         self.addSubview(label)

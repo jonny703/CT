@@ -1,9 +1,9 @@
 //
 //  StyleGuideManager.swift
-//  SpaceIn
+//  CT
 //
-//  Created by Richard Velazquez on 12/8/16.
-//  Copyright © 2016 Ricky. All rights reserved.
+//  Created by John Nik on 4/6/17.
+//  Copyright © 2017 johnik703. All rights reserved.
 //
 
 import Foundation
@@ -20,31 +20,17 @@ public class StyleGuideManager {
     
     //intro
     static let introBackgroundColor = UIColor(r: 0, g: 204, b: 253)
-    
-    //Login
-    static let loginTextFieldDefaultColor = UIColor.white
-    static let loginPlaceholderTextColor = UIColor.white
-
-    static let loginTextFieldSelectedColor = UIColor(withNumbersFor: 36, green: 255, blue: 132)
-    static let loginTextFieldTextColor = UIColor(withNumbersFor: 36, green: 217, blue: 255)
-    
-    static let loginButtonBorderColor = UIColor(red: 105 / 255 , green: 240 / 255, blue: 174 / 255, alpha: 1.0)
-    static let loginPageTextColor = UIColor.white
-
-    //Register
-    static let registerPlaceholderTextColor = UIColor.lightGray
-    static let registerTextFieldDefaultColor = UIColor(withNumbersFor: 16, green: 249, blue: 232)
-
-    static let registerTextFieldSelectedColor = StyleGuideManager.loginTextFieldSelectedColor
-    static let registerTextFieldTextColor = UIColor(withNumbersFor: 36, green: 217, blue: 255)
-    static let registerPageTextColor = UIColor.darkGray
-    
-    //Map
-    static let floatingSpaceinLabelColor = UIColor(withNumbersFor: 8, green: 203, blue: 252)
-    static let floatingSpaceinNeonBackground = UIColor(withNumbersFor: 4, green: 144, blue: 237)
     static let floatingSpaceinLabelFont = UIFont(name: "Helvetica-Bold", size: 72)
+    static let crytpTweetsDefaultColor = UIColor(r: 52, g: 76, b: 104)
+    static let crytpTweetsBarTintColor = UIColor(r: 19, g: 45, b: 79)
     
-
+    //chart colors
+    static let redColor = UIColor(r: 218, g: 31, b: 38)
+    static let greenColor = UIColor(r: 142, g: 216, b: 89)
+    
+    static let likeButtonActiveBlueColor = UIColor(r: 0, g: 116, b: 240)
+    static let likeButtonEmoticonColor = UIColor(r: 255, g: 192, b: 6)
+    static let likeButtonAngryColor = UIColor(r: 251, g: 90, b: 38)
     
     
     //Fonts
@@ -66,7 +52,6 @@ public class StyleGuideManager {
     }
     
     //MARK: - Forgot Password
-    static let forgotPasswordTextColor = UIColor(withNumbersFor: 66, green: 80, blue: 83)
     
     func forgotPasswordPageFont() -> UIFont {
         return UIFont(name: "Helvetica Light", size: 17)!

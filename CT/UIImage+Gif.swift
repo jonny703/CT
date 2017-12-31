@@ -1,9 +1,9 @@
 //
 //  Gif.swift
-//  SwiftGif
+//  CT
 //
-//  Created by Arne Bahlo on 07.06.14.
-//  Copyright (c) 2014 Arne Bahlo. All rights reserved.
+//  Created by John Nik on 4/6/17.
+//  Copyright © 2017 johnik703. All rights reserved.
 //
 
 import UIKit
