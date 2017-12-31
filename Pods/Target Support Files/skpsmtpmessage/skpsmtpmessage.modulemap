@@ -1,0 +1,6 @@
+framework module skpsmtpmessage {
+  umbrella header "skpsmtpmessage-umbrella.h"
+
+  export *
+  module * { export * }
+}

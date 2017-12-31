@@ -1,9 +1,9 @@
 //
 //  Env.swift
-//  SwiftCharts
+//  CT
 //
-//  Created by ischuetz on 07/05/15.
-//  Copyright (c) 2015 ivanschuetz. All rights reserved.
+//  Created by John Nik on 4/6/17.
+//  Copyright © 2017 johnik703. All rights reserved.
 //
 
 import UIKit

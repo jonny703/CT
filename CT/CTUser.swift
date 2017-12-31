@@ -1,24 +1,21 @@
 //
 //  User.swift
-//  SpaceIn
+//  CT
 //
-//  Created by PAC on 7/17/17.
-//  Copyright © 2017 Ricky. All rights reserved.
+//  Created by John Nik on 4/6/17.
+//  Copyright © 2017 johnik703. All rights reserved.
 //
 
 import UIKit
 
-class SpaceUser: NSObject {
+class CTUser: NSObject {
     
     var userId: String?
-    var name: String?
+    var fullname: String?
     var profilePictureURL: String?
     var email: String?
+    var username: String?
     var location: String?
     var bio: String?
-    var age: NSNumber?
-    var job: String?
-    var isLogIn: NSNumber?
-    var user_location: [String: [String: Any]]?
-    var postCount: NSNumber?
+    var memberSince: String?
 }

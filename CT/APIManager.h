@@ -25,6 +25,8 @@ typedef void (^APIErrorHandler) (NSString *errorStr);
 
 #pragma mark - Helpers
 
+- (void)getChartsListWithUrl:(NSString *)urlStr CompletionHandler:(APICompletionHandlerWithArray)succeedHandler ErrorHandler:(APIErrorHandler)errorHandler;
+
 - (void) executeHTTPRequest:(NSString *)method url:(NSString *)urlStr headers:(NSDictionary *)headerDic parameters:(NSDictionary *)paramDic CompletionHandler:(APICompletionHandler)succeedHandler ErrorHandler:(APIErrorHandler)errorHandler;
 
 - (void) executeHTTPRequest:(NSString *)method url:(NSString *)urlStr parameters:(NSDictionary *)paramDic CompletionHandler:(APICompletionHandler)succeedHandler ErrorHandler:(APIErrorHandler)errorHandler;

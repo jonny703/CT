@@ -1,17 +1,22 @@
 //
 //  CreatePostController.swift
-//  SpaceIn
+//  CT
 //
-//  Created by PAC on 7/25/17.
-//  Copyright © 2017 Ricky. All rights reserved.
+//  Created by John Nik on 4/6/17.
+//  Copyright © 2017 johnik703. All rights reserved.
 //
 
 import UIKit
 import Firebase
+import KRProgressHUD
 
 class CreatePostController: UIViewController {
     
-    fileprivate var viewAppeared = false
+    var streamControllerDelegate: StreamControllerDelegate?
+    var chartDetailControllerDelegate: ChartDetailControllerDelegate?
+    
+    var selectedControllerStatus: StreamControllerStatus = .Following
+    var postChildName: String?
     
     fileprivate var isSelectedPhoto = false
     
@@ -20,35 +25,14 @@ class CreatePostController: UIViewController {
     
     //MARK set UI
     
-    fileprivate let blurEffectView = UIVisualEffectView(effect: UIBlurEffect(style: UIBlurEffectStyle.light))
-    var spinner : UIActivityIndicatorView?
-    
-    
-    
-    let backButton: UIButton = {
-        
-        let button = UIButton(type: .system)
-        let image = UIImage(named: AssetName.dismissX.rawValue)
-        button.setImage(image, for: .normal)
-        button.translatesAutoresizingMaskIntoConstraints = false
-        button.addTarget(self, action: #selector(dismissController), for: .touchUpInside)
-        button.tintColor = .black
-        return button
-        
+    let profileImageView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.image = UIImage(named: AssetName.itunesArtwork.rawValue)
+        imageView.layer.cornerRadius = 6
+        imageView.layer.masksToBounds = true
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        return imageView
     }()
-    
-    let postButton: UIButton = {
-        
-        let button = UIButton(type: .system)
-        button.setTitle("Post", for: .normal)
-        button.setTitleColor(.black, for: .normal)
-        button.translatesAutoresizingMaskIntoConstraints = false
-        button.addTarget(self, action: #selector(handlePost), for: .touchUpInside)
-        return button
-        
-    }()
-    
-    
     
     let postTextView: UITextView = {
         let textView = UITextView()
@@ -69,8 +53,9 @@ class CreatePostController: UIViewController {
     
     lazy var inputContainerView: ChatInputContainerView = {
         
-        let chatInputContainerview = ChatInputContainerView(frame: CGRect(x: 0, y: 0, width: self.view.frame.width, height: 50))
+        let chatInputContainerview = ChatInputContainerView(frame: CGRect(x: 0, y: 0, width: self.view.frame.width, height: 30))
         chatInputContainerview.containerView.isHidden = true
+        chatInputContainerview.seperatorLineView.isHidden = true
         chatInputContainerview.createPostController = self
         
         return chatInputContainerview
@@ -81,15 +66,19 @@ class CreatePostController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupBackground()
+        setupNavBar()
         setupViews()
         
+        fetchUserProfile()
         
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
-//        postTextView.text = PlaceHolderText
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
     }
     
     override var inputAccessoryView: UIView? {
@@ -109,19 +98,82 @@ class CreatePostController: UIViewController {
 }
 
 
+//MARK: fetch user profile
+
+extension CreatePostController {
+    
+    fileprivate func fetchUserProfile() {
+        
+        guard let uid = Auth.auth().currentUser?.uid else {
+            return
+        }
+        let ref = Database.database().reference().child("users").child(uid)
+        
+        ref.observeSingleEvent(of: .value, with: { (snapshot) in
+            
+            if let dictionary = snapshot.value as? [String: AnyObject] {
+                let profileImageUrl = dictionary["profilePictureURL"] as? String
+                if profileImageUrl != "" {
+                    
+                    self.profileImageView.loadImageUsingCacheWithUrlString(urlString: profileImageUrl!)
+                }
+            }
+        }, withCancel: nil)
+        
+        
+    }
+    
+}
+
+
+
+//MARK: handle top tab bar 
+
+extension CreatePostController {
+    
+    fileprivate func returnTabBarStringWithSelection() -> String {
+        var tabStr = "following"
+        if self.selectedControllerStatus == .Following {
+            tabStr = "following"
+        } else if self.selectedControllerStatus == .Blog {
+            tabStr = "blog"
+        } else if self.selectedControllerStatus == .News {
+            tabStr = "news"
+        } else if self.selectedControllerStatus == .Miners {
+            tabStr = "miners"
+        } else if self.selectedControllerStatus == .Charts {
+            tabStr = "charts"
+        } else if self.selectedControllerStatus == .Analysis {
+            tabStr = "analysis"
+        }
+        return tabStr
+    }
+    
+}
+
 
 //MARK: handle post and dismiss controller
 
 extension CreatePostController {
     
     func handlePost() {
-        
-        self.addSpinner()
+        KRProgressHUD.set(style: .black)
+        KRProgressHUD.set(activityIndicatorViewStyle: .color(.white))
+        KRProgressHUD.show()
         
         if isSelectedPhoto == true {
             handlePostImage()
         } else {
-            let properties = ["text": postTextView.text!] as [String : AnyObject]
+            
+            if postTextView.text == PlaceHolderText {
+                KRProgressHUD.dismiss()
+                showAlertMessage(vc: self, titleStr: "Oops! Can't post", messageStr: "Please fill out content")
+                
+                return
+            }
+            
+            let properties = ["text": postTextView.text!,
+                "imageUrl": "", "imageWidth": 0, "imageHeight": 0, "isBlock": "false"] as [String : AnyObject]
             
             sendMessageWithProperties(properties: properties)
         }
@@ -129,11 +181,20 @@ extension CreatePostController {
     
     fileprivate func handlePostImage() {
         
-        uploadToFirebaseStorageUsingImage(image: postImageView.image!, completiion: { (imageUrl) in
+        if let postImage = postImageView.image {
+            var image = postImage
+            if postImage.size.width > 600 {
+                image = postImage.resized(toWidth: 600.0)!
+                
+            }
             
-            self.sendMessageWithImageUrl(imageUrl: imageUrl, image: self.postImageView.image!)
+            uploadToFirebaseStorageUsingImage(image: image, completiion: { (imageUrl) in
+                
+                self.sendMessageWithImageUrl(imageUrl: imageUrl, image: image)
+                
+            })
             
-        })
+        }
     }
 
     private func uploadToFirebaseStorageUsingImage(image: UIImage, completiion: @escaping (_ imageUrl: String) -> ()) {
@@ -162,9 +223,9 @@ extension CreatePostController {
     private func sendMessageWithImageUrl(imageUrl: String, image: UIImage) {
         var properties: [String: AnyObject]
         if postTextView.text == "" || postTextView.text == PlaceHolderText {
-            properties = ["imageUrl": imageUrl, "imageWidth": image.size.width, "imageHeight": image.size.height] as [String : AnyObject]
+            properties = ["imageUrl": imageUrl, "imageWidth": image.size.width, "imageHeight": image.size.height, "text": "", "isBlock": "false"] as [String : AnyObject]
         } else {
-            properties = ["imageUrl": imageUrl, "imageWidth": image.size.width, "imageHeight": image.size.height, "text": postTextView.text!] as [String : AnyObject]
+            properties = ["imageUrl": imageUrl, "imageWidth": image.size.width, "imageHeight": image.size.height, "text": postTextView.text!, "isBlock": "false"] as [String : AnyObject]
         }
         
         
@@ -173,38 +234,75 @@ extension CreatePostController {
     
     private func sendMessageWithProperties(properties: [String: AnyObject]) {
         
-        let ref = Database.database().reference().child("posts")
-        let childRef = ref.childByAutoId()
+        guard let fromId = Auth.auth().currentUser?.uid else { return }
         
-        let fromId = Auth.auth().currentUser!.uid
+        var category = String()
+        if self.selectedControllerStatus == .Other {
+            
+            if let postChildName = self.postChildName {
+                category = postChildName
+            }
+            
+        } else {
+            category = self.returnTabBarStringWithSelection()
+        }
+        
+        
+        
+        let baseRef = Database.database().reference()
+        let childRef = baseRef.child("all-posts").childByAutoId()
+        
+        
         
         let timestamp = NSDate().timeIntervalSince1970 as NSNumber
         
-        var values = ["postId": childRef.key, "fromId": fromId, "timestamp": timestamp] as [String : AnyObject]
+        var values = ["category": category, "postId": childRef.key, "fromId": fromId, "timestamp": timestamp] as [String : AnyObject]
         
         
         //append properties dictionary onto values somehow??
         //key $0, value $1
         properties.forEach({values[$0] = $1})
         
-        //        childRef.updateChildValues(values)
-        
         childRef.updateChildValues(values) { (error, ref) in
             
             if error != nil {
                 print(error!)
+                KRProgressHUD.dismiss()
                 return
             }
             
+            baseRef.child("posts").child(category).child(childRef.key).updateChildValues(values)
+            
             self.postTextView.text = nil
             
-            let userPostsRef = Database.database().reference().child("user-posts").child(fromId)
+            let userPostsRef = baseRef.child("user-posts").child(fromId)
             
             let postId = childRef.key
             userPostsRef.updateChildValues([postId: 1])
             
-            self.stopSpinner()
-            self.dismiss(animated: true, completion: nil)
+            let followersRef = baseRef.child("followers").child(fromId)
+            followersRef.observeSingleEvent(of: .value, with: { (snapshot) in
+                
+                let groupKeys = snapshot.children.flatMap { $0 as? DataSnapshot }.map { $0.key }
+                
+                for child in groupKeys {
+                    
+                    let followingPostsRef = baseRef.child("following-posts").child(child)
+                    followingPostsRef.childByAutoId().updateChildValues(values)
+                    
+                }
+                print("test profile for empty")
+                KRProgressHUD.dismiss()
+                self.dismiss(animated: true, completion: {
+                    
+                    if self.selectedControllerStatus == .Other {
+                        self.chartDetailControllerDelegate?.reloadDataWhenNewPosted()
+                    } else {
+                        self.streamControllerDelegate?.reloadDataWhenNewPosted()
+                    }
+                    
+                })
+            })
         }
     }
     
@@ -212,41 +310,6 @@ extension CreatePostController {
         self.dismiss(animated: true, completion: nil)
     }
     
-}
-
-//MARK: handle spinner
-
-extension CreatePostController {
-    func addSpinner() {
-        self.spinner = UIActivityIndicatorView(activityIndicatorStyle: .gray)
-        self.view.addSubview(self.spinner!)
-        self.view.isUserInteractionEnabled = false
-        self.constrainSpinner()
-        self.spinner!.startAnimating()
-        self.spinner!.hidesWhenStopped = true
-    }
-    
-    func stopSpinner() {
-        if self.spinner != nil {
-            self.spinner!.stopAnimating()
-            self.view.isUserInteractionEnabled = true
-            self.spinner!.removeFromSuperview()
-            self.spinner = nil
-        }
-        
-    }
-    
-    fileprivate func constrainSpinner() {
-        if self.spinner != nil {
-            self.view.bringSubview(toFront: self.spinner!)
-            self.spinner!.translatesAutoresizingMaskIntoConstraints = false
-            self.spinner!.centerXAnchor.constraint(equalTo: self.view.centerXAnchor).isActive = true
-            self.spinner!.centerYAnchor.constraint(equalTo: self.view.centerYAnchor).isActive = true
-            self.spinner!.widthAnchor.constraint(equalToConstant: 60).isActive = true
-            self.spinner!.heightAnchor.constraint(equalToConstant: 60).isActive = true
-        }
-    }
-
 }
 
 //MARK: uiImagePickerDelegate, handle post Image
@@ -270,7 +333,6 @@ extension CreatePostController: UIImagePickerControllerDelegate, UINavigationCon
                 
                 picker.modalPresentationStyle = .popover
                 picker.popoverPresentationController?.delegate = self
-                //                picker.popoverPresentationController?.sourceView = self.view
                 self.present(picker, animated: true, completion: nil)
                 
             } else {
@@ -295,7 +357,6 @@ extension CreatePostController: UIImagePickerControllerDelegate, UINavigationCon
                     
                     picker.modalPresentationStyle = .popover
                     picker.popoverPresentationController?.delegate = self
-                    //                    picker.popoverPresentationController?.sourceView = self.view
                     self.present(picker, animated: true, completion: nil)
                     
                 } else {
@@ -322,7 +383,6 @@ extension CreatePostController: UIImagePickerControllerDelegate, UINavigationCon
             
             alertController.modalPresentationStyle = .popover
             alertController.popoverPresentationController?.delegate = self
-            //            alertController.popoverPresentationController?.sourceView = view
             present(alertController, animated: true, completion: nil)
             
             
@@ -402,15 +462,16 @@ extension CreatePostController: UITextViewDelegate {
     
     func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
         
-        if text == "\n" {
-            textView.resignFirstResponder()
-            return false
+        if range.length == 0 {
+            if text == "\n" {
+                textView.text = String(format: "%@\n", textView.text)
+                return false
+            }
         }
+        
+        
         return true
     }
-
-
-    
 }
 
 //MARK: setup Background
@@ -418,32 +479,24 @@ extension CreatePostController: UITextViewDelegate {
 extension CreatePostController {
     
     fileprivate func setupBackground() {
-        setupBackgroundView()
-        addBlurEffectViewFrame()
+        
+        view.backgroundColor = .white
     }
     
-    fileprivate func setupBackgroundView() {
-        guard viewAppeared == false else { return }
+    fileprivate func setupNavBar() {
         
-        if !UIAccessibilityIsReduceTransparencyEnabled() {
-            view.backgroundColor = UIColor.clear
-            
-            //always fill the view
-            
-            blurEffectView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-            view.insertSubview(blurEffectView, at: 0)
-            blurEffectView.frame = CGRect(x: view.frame.width / 2, y: view.frame.height / 2, width: 0, height: 0)
-            self.modalPresentationCapturesStatusBarAppearance = false
-        } else {
-            view.backgroundColor = .clear
-        }
-    }
-    
-    fileprivate func addBlurEffectViewFrame() {
-        guard viewAppeared == false else { return }
+        self.navigationController?.isNavigationBarHidden = false
         
-        self.blurEffectView.frame = CGRect(x: 0, y: 0, width: self.view.frame.width, height: self.view.frame.height)
         
+        let image = UIImage(named: AssetName.close.rawValue)?.withRenderingMode(.alwaysOriginal)
+        self.navigationItem.leftBarButtonItem = UIBarButtonItem(image: image, style: .plain, target: self, action: #selector(dismissController))
+        let postButton = UIBarButtonItem(title: "Post", style: .plain, target: self, action: #selector(handlePost))
+        postButton.tintColor = .white
+        self.navigationItem.rightBarButtonItem = postButton
+        
+        navigationController?.navigationBar.barTintColor = StyleGuideManager.crytpTweetsBarTintColor
+        
+        navigationController?.navigationBar.titleTextAttributes = [NSForegroundColorAttributeName: UIColor.white]
     }
 }
 
@@ -453,39 +506,29 @@ extension CreatePostController {
 extension CreatePostController {
     
     fileprivate func setupViews() {
-        setupBackButton()
+        setupProfileImageView()
         setupPostTextView()
         setupPostImageView()
-        setupPostButton()
     }
     
-    fileprivate func setupPostButton() {
+    private func setupProfileImageView() {
         
-        view.addSubview(postButton)
+        view.addSubview(profileImageView)
         
-        postButton.widthAnchor.constraint(equalToConstant: 60).isActive = true
-        postButton.heightAnchor.constraint(equalToConstant: 25).isActive = true
-        postButton.topAnchor.constraint(equalTo: view.topAnchor, constant: 20).isActive = true
-        postButton.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -20).isActive = true
+        profileImageView.widthAnchor.constraint(equalToConstant: 50).isActive = true
+        profileImageView.heightAnchor.constraint(equalToConstant: 50).isActive = true
+        profileImageView.topAnchor.constraint(equalTo: self.topLayoutGuide.bottomAnchor, constant: 10).isActive = true
+        profileImageView.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 15).isActive = true
         
     }
     
     fileprivate func setupPostImageView() {
         view.addSubview(postImageView)
         postImageView.widthAnchor.constraint(equalTo: postTextView.widthAnchor).isActive = true
-        postImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+        postImageView.leftAnchor.constraint(equalTo: postTextView.leftAnchor).isActive = true
         postImageView.topAnchor.constraint(equalTo: postTextView.bottomAnchor, constant: 3).isActive = true
         postImageViewConstraint = postImageView.heightAnchor.constraint(equalToConstant: 100)
         postImageViewConstraint?.isActive = true
-    }
-    
-    fileprivate func setupBackButton() {
-        view.addSubview(backButton)
-        
-        backButton.widthAnchor.constraint(equalToConstant: 25).isActive = true
-        backButton.heightAnchor.constraint(equalToConstant: 25).isActive = true
-        backButton.topAnchor.constraint(equalTo: view.topAnchor, constant: 20).isActive = true
-        backButton.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 20).isActive = true
     }
     
     fileprivate func setupPostTextView() {
@@ -493,9 +536,9 @@ extension CreatePostController {
         
         view.addSubview(postTextView)
         
-        postTextView.widthAnchor.constraint(equalToConstant: DEVICE_WIDTH * 0.9).isActive = true
-        postTextView.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
-        postTextView.topAnchor.constraint(equalTo: backButton.bottomAnchor, constant: 5).isActive = true
+        postTextView.leftAnchor.constraint(equalTo: profileImageView.rightAnchor, constant: 15).isActive = true
+        postTextView.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -15).isActive = true
+        postTextView.topAnchor.constraint(equalTo: profileImageView.topAnchor, constant: 0).isActive = true
         postTextView.heightAnchor.constraint(equalToConstant: 150).isActive = true
         
         postTextView.text = PlaceHolderText

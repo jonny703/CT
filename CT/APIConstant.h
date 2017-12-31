@@ -12,7 +12,7 @@
 #define API [APIManager sharedManager]
 
 #define Get     @"get"
-#define Post    @"post"
+#define PostAPI    @"post"
 #define Patch   @"patch"
 #define Delete  @"delete"
 

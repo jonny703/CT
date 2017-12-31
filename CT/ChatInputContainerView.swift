@@ -1,44 +1,57 @@
 //
 //  ChatInputContainerView.swift
-//  gameofchats
+//  CT
 //
-//  Created by PAC on 4/8/17.
-//  Copyright © 2017 PAC. All rights reserved.
+//  Created by John Nik on 4/6/17.
+//  Copyright © 2017 johnik703. All rights reserved.
 //
 
 import UIKit
 
+
+protocol InputTextFieldDelegate {
+    func inputTextFieldDidChanged(textField: UITextField)
+}
+
 class ChatInputContainerView: UIView, UITextFieldDelegate {
     
-    var chatOnebyOneController: ChatOnebyOneController? {
-        
-        didSet {
-            sendButton.addTarget(chatOnebyOneController, action: #selector(chatOnebyOneController?.handleSend), for: .touchUpInside)
-            
-            
-            uploadImageView.addGestureRecognizer(UITapGestureRecognizer(target: chatOnebyOneController, action: #selector(chatOnebyOneController?.handleUploadTap)))
-        }
-    }
+    var inputTextFieldDelegate: InputTextFieldDelegate?
     
     var createPostController: CreatePostController? {
         
         didSet {
             uploadImageView.addGestureRecognizer(UITapGestureRecognizer(target: createPostController, action: #selector(createPostController?.handleSelectPostImageView)))
+            
+            backgroundColor = .clear
         }
-        
     }
     
-    var postReplyController: PostReplyController? {
+    var oneToOneChatController: OneToOneChatController? {
+        
         didSet {
-            sendButton.addTarget(postReplyController, action: #selector(postReplyController?.handleSend), for: .touchUpInside)
-            uploadImageView.addGestureRecognizer(UITapGestureRecognizer(target: postReplyController, action: #selector(postReplyController?.handleUploadTap)))
+            sendButton.addTarget(oneToOneChatController, action: #selector(oneToOneChatController?.handleSend), for: .touchUpInside)
+            
+            
+            uploadImageView.addGestureRecognizer(UITapGestureRecognizer(target: oneToOneChatController, action: #selector(oneToOneChatController?.handleUploadTap)))
+            
+            backgroundColor = StyleGuideManager.crytpTweetsDefaultColor
+        }
+    }
+
+    var postCommentController: PostCommentsController? {
+        didSet {
+            sendButton.addTarget(postCommentController, action: #selector(postCommentController?.handleSend), for: .touchUpInside)
+            
+            
+            uploadImageView.addGestureRecognizer(UITapGestureRecognizer(target: postCommentController, action: #selector(postCommentController?.handleUploadTap)))
+            backgroundColor = .clear
         }
     }
     
     let uploadImageView: UIImageView = {
         
         let uploadImageView = UIImageView()
-        uploadImageView.image = UIImage(named: AssetName.plusButton.rawValue)
+        uploadImageView.image = UIImage(named: AssetName.addPhoto.rawValue)
         uploadImageView.isUserInteractionEnabled = true
         uploadImageView.translatesAutoresizingMaskIntoConstraints = false
         return uploadImageView
@@ -51,6 +64,7 @@ class ChatInputContainerView: UIView, UITextFieldDelegate {
         textField.placeholder = "Text Goes Here..."
         textField.translatesAutoresizingMaskIntoConstraints = false
         textField.delegate = self
+        textField.addTarget(self, action: #selector(inputTextFieldDidChange(textField:)), for: .editingChanged)
         return textField
         
     }()
@@ -63,6 +77,7 @@ class ChatInputContainerView: UIView, UITextFieldDelegate {
         button.layer.cornerRadius = 15
         button.layer.masksToBounds = true
         button.translatesAutoresizingMaskIntoConstraints = false
+        button.isUserInteractionEnabled = false
         return button
 
         
@@ -77,28 +92,25 @@ class ChatInputContainerView: UIView, UITextFieldDelegate {
         view.layer.masksToBounds = true
         return view
     }()
-    
-//    let uploadImageView = UIImageView()
+    let seperatorLineView = UIView()
     
     override init(frame: CGRect) {
         super.init(frame: frame)
         
-        backgroundColor = UIColor.clear
+        
+        
         
         addSubview(uploadImageView)
         
-        uploadImageView.leftAnchor.constraint(equalTo: leftAnchor, constant: 0).isActive = true
+        uploadImageView.leftAnchor.constraint(equalTo: leftAnchor, constant: 7).isActive = true
         uploadImageView.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
         uploadImageView.widthAnchor.constraint(equalToConstant: 30).isActive = true
         uploadImageView.heightAnchor.constraint(equalToConstant: 30).isActive = true
         
-        //what is handle?
-//        sendButton.addTarget(self, action: #selector(self.chatLogController?.handleSend), for: .touchUpInside)
-        
         
         addSubview(containerView)
         
-        containerView.leftAnchor.constraint(equalTo: uploadImageView.rightAnchor, constant: 7).isActive = true
+        containerView.leftAnchor.constraint(equalTo: uploadImageView.rightAnchor, constant: 3).isActive = true
         containerView.rightAnchor.constraint(equalTo: rightAnchor).isActive = true
         containerView.topAnchor.constraint(equalTo: topAnchor).isActive = true
         containerView.heightAnchor.constraint(equalTo: heightAnchor).isActive = true
@@ -113,27 +125,35 @@ class ChatInputContainerView: UIView, UITextFieldDelegate {
         
         containerView.addSubview(self.inputTextField)
         
-        self.inputTextField.leftAnchor.constraint(equalTo: containerView.leftAnchor, constant: 20).isActive = true
+        self.inputTextField.leftAnchor.constraint(equalTo: containerView.leftAnchor, constant: 4).isActive = true
         self.inputTextField.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
         self.inputTextField.rightAnchor.constraint(equalTo: sendButton.leftAnchor).isActive = true
         self.inputTextField.heightAnchor.constraint(equalTo: heightAnchor).isActive = true
         
-//        let seperatorLineView = UIView()
-//        seperatorLineView.backgroundColor = UIColor.black
-//        seperatorLineView.translatesAutoresizingMaskIntoConstraints = false
-//        addSubview(seperatorLineView)
-//        
-//        seperatorLineView.leftAnchor.constraint(equalTo: leftAnchor).isActive = true
-//        seperatorLineView.topAnchor.constraint(equalTo: topAnchor).isActive = true
-//        seperatorLineView.widthAnchor.constraint(equalTo: widthAnchor).isActive = true
-//        seperatorLineView.heightAnchor.constraint(equalToConstant: 1).isActive = true
+        seperatorLineView.backgroundColor = UIColor.lightGray
+        seperatorLineView.translatesAutoresizingMaskIntoConstraints = false
+        
+        addSubview(seperatorLineView)
+        
+        seperatorLineView.leftAnchor.constraint(equalTo: leftAnchor).isActive = true
+        seperatorLineView.topAnchor.constraint(equalTo: topAnchor).isActive = true
+        seperatorLineView.widthAnchor.constraint(equalTo: widthAnchor).isActive = true
+        seperatorLineView.heightAnchor.constraint(equalToConstant: 1).isActive = true
 
         
     }
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        chatOnebyOneController?.handleSend()
+        self.inputTextField.resignFirstResponder()
         return true
+    }
+    
+    func inputTextFieldDidChange(textField: UITextField) {
+        
+        if textField == inputTextField {
+            self.inputTextFieldDelegate?.inputTextFieldDidChanged(textField: textField)
+        }
+        
     }
     
     required init?(coder aDecoder: NSCoder) {

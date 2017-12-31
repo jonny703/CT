@@ -1,9 +1,9 @@
 //
 //  Alerts.swift
-//  247Trivia
+//  CT
 //
-//  Created by PAC on 6/28/17.
-//  Copyright © 2017 PAC. All rights reserved.
+//  Created by John Nik on 4/6/17.
+//  Copyright © 2017 johnik703. All rights reserved.
 //
 
 import Foundation
@@ -20,6 +20,18 @@ extension UIViewController{
         alert.addAction(okAction)
         present(alert, animated: true, completion: completion)
     }
+    
+    func showErrorAlertWithOKCancel(_ title:String? = nil, message:String, action:(AlertActionHandler)? = nil, completion:AlertPresentCompletion? = nil){
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        let okAction = UIAlertAction(title: "OK", style: .default, handler: action)
+        alert.addAction(okAction)
+        
+        let cancelAction = UIAlertAction(title: "Cancel", style: .destructive, handler: nil)
+        alert.addAction(cancelAction)
+        
+        present(alert, animated: true, completion: completion)
+    }
+
 }
 
 

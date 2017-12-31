@@ -1,21 +1,89 @@
 //
 //  Extentions.swift
-//  LendSystem
+//  CT
 //
-//  Created by PAC on 3/28/17.
-//  Copyright © 2017 PAC. All rights reserved.
+//  Created by John Nik on 4/6/17.
+//  Copyright © 2017 johnik703. All rights reserved.
 //
 
 import UIKit
 
-extension Float {
-    //    var clean: String { return self.truncatingRemainder(dividingBy: 1) == 0 ? String(format: "%.2f", self) : String(self) }
+extension NSRange {
+    func range(for str: String) -> Range<String.Index>? {
+        guard location != NSNotFound else { return nil }
+        
+        guard let fromUTFIndex = str.utf16.index(str.utf16.startIndex, offsetBy: location, limitedBy: str.utf16.endIndex) else { return nil }
+        guard let toUTFIndex = str.utf16.index(fromUTFIndex, offsetBy: length, limitedBy: str.utf16.endIndex) else { return nil }
+        guard let fromIndex = String.Index(fromUTFIndex, within: str) else { return nil }
+        guard let toIndex = String.Index(toUTFIndex, within: str) else { return nil }
+        
+        return fromIndex ..< toIndex
+    }
+}
+extension Date {
     
-    var clean: String {
-        return  String(format: "%.1f", self)
+    var yesterday: Date {
+        return Calendar.current.date(byAdding: .day, value: -1, to: self)!
+    }
+    var tomorrow: Date {
+        return Calendar.current.date(byAdding: .day, value: 1, to: self)!
+        
+    }
+    var aWeekAgo: Date {
+        return Calendar.current.date(byAdding: .day, value: -7, to: self)!
+    }
+    var aMonthAgo: Date {
+        return Calendar.current.date(byAdding: .month, value: -1, to: self)!
+    }
+    var threeMonthAgo: Date {
+        return Calendar.current.date(byAdding: .month, value: -3, to: self)!
+        
+    }
+    var sixMonthAgo: Date {
+        return Calendar.current.date(byAdding: .month, value: -6, to: self)!
+    }
+    var aYearAgo: Date {
+        return Calendar.current.date(byAdding: .month, value: -12, to: self)!
     }
     
-    var cleanKm: String {
+    func isGreaterThanDate(dateToCompare: Date) -> Bool {
+        var isGreater = false
+        if self.compare(dateToCompare) == ComparisonResult.orderedDescending {
+            isGreater = true
+        }
+        
+        return isGreater
+    }
+    
+    func isLessThanDate(dateToCompare: Date) -> Bool {
+        var isLess = false
+        if self.compare(dateToCompare) == ComparisonResult.orderedAscending {
+            isLess = true
+        }
+        return isLess
+    }
+    
+    func equalToDate(dateToCompare: Date) -> Bool {
+        var isEqual = false
+        if self.compare(dateToCompare) == ComparisonResult.orderedSame {
+            isEqual = true
+        }
+        return isEqual
+    }
+}
+
+extension Double {
+    //    var clean: String { return self.truncatingRemainder(dividingBy: 1) == 0 ? String(format: "%.2f", self) : String(self) }
+    
+    var cleanFloat: String {
+        return  String(format: "%.2f", self)
+    }
+    
+    var cleanFloatSix: String {
+        return  String(format: "%.6f", self)
+    }
+    
+    var cleanInt: String {
         return  String(format: "%d", self)
     }
     
@@ -37,39 +105,25 @@ extension UIColor {
     
 }
 
-extension String
-{
-    var md5: String! {
-        let str = self.cString(using: String.Encoding.utf8)
-        let strLen = CC_LONG(self.lengthOfBytes(using: String.Encoding.utf8))
-        let digestLen = Int(CC_MD5_DIGEST_LENGTH)
-        let result = UnsafeMutablePointer<CUnsignedChar>.allocate(capacity: digestLen)
-        
-        CC_MD5(str!, strLen, result)
-        
-        let hash = NSMutableString()
-        for i in 0..<digestLen {
-            hash.appendFormat("%02x", result[i])
-        }
-        
-        result.deallocate(capacity: digestLen)
-        
-        return String(format: hash as String)
-    }
-}
-
-
 extension UIView {
     
-    func addConstraintsWithFormat(format: String, views:UIView...) {
-        var viewDictionary = [String: UIView]()
+    func addConnstraintsWith(Format:String, views: UIView...) {
+        
+        var viewsDictionary = [String: UIView]()
         for (index, view) in views.enumerated() {
             let key = "v\(index)"
             view.translatesAutoresizingMaskIntoConstraints = false
-            viewDictionary[key] = view
+            viewsDictionary[key] = view
         }
         
-        addConstraints(NSLayoutConstraint.constraints(withVisualFormat: format, options: NSLayoutFormatOptions(), metrics: nil, views: viewDictionary))
+        addConstraints(NSLayoutConstraint.constraints(withVisualFormat: Format, options: NSLayoutFormatOptions(), metrics: nil, views: viewsDictionary))
+    }
+    
+    func reoundCorners(corners: UIRectCorner, radius: CGFloat) {
+        let path = UIBezierPath(roundedRect: self.bounds, byRoundingCorners: corners, cornerRadii: CGSize(width: 10, height: 10))
+        let mask = CAShapeLayer()
+        mask.path = path.cgPath
+        self.layer.mask = mask
     }
     
 }
@@ -86,8 +140,26 @@ extension UIButton {
     }
 }
 
-let imageCache = NSCache<AnyObject, AnyObject>()
 
+
+extension UIImage {
+    func resized(withPercentage percentage: CGFloat) -> UIImage? {
+        let canvasSize = CGSize(width: size.width * percentage, height: size.height * percentage)
+        UIGraphicsBeginImageContextWithOptions(canvasSize, false, scale)
+        defer { UIGraphicsEndImageContext() }
+        draw(in: CGRect(origin: .zero, size: canvasSize))
+        return UIGraphicsGetImageFromCurrentImageContext()
+    }
+    func resized(toWidth width: CGFloat) -> UIImage? {
+        let canvasSize = CGSize(width: width, height: CGFloat(ceil(width/size.width * size.height)))
+        UIGraphicsBeginImageContextWithOptions(canvasSize, false, scale)
+        defer { UIGraphicsEndImageContext() }
+        draw(in: CGRect(origin: .zero, size: canvasSize))
+        return UIGraphicsGetImageFromCurrentImageContext()
+    }
+}
+
+let imageCache = NSCache<NSString, UIImage>()
 extension UIImageView {
     
     func imageWithString(name: String, radius: CGFloat) {
@@ -103,13 +175,16 @@ extension UIImageView {
         
     }
     
+    
+    
+    
     func loadImageUsingCacheWithUrlString(urlString: String) {
         
         self.image = nil
         
         //check cache for image first
         
-        if let cachedImage = imageCache.object(forKey: urlString as AnyObject) as? UIImage {
+        if let cachedImage = imageCache.object(forKey: urlString as NSString) {
             
             self.image = cachedImage
             return
@@ -128,7 +203,7 @@ extension UIImageView {
                 
                 if let downloadedImage = UIImage(data: data!) {
                     
-                    imageCache.setObject(downloadedImage, forKey: urlString as AnyObject)
+                    imageCache.setObject(downloadedImage, forKey: urlString as NSString)
                     self.image = downloadedImage
                     
                 }
@@ -136,4 +211,43 @@ extension UIImageView {
             
         }).resume()
     }
+}
+
+class CacheImageView: UIImageView {
+    var imageUrlString: String?
+    
+    func loadImageUsingUrlString(urlString: String) {
+        
+        imageUrlString = urlString
+        
+        let url = URL(string: urlString)
+        
+        image = nil
+        
+        if let imageFromCache = imageCache.object(forKey: urlString as NSString) {
+            self.image = imageFromCache
+            return
+        }
+        
+        URLSession.shared.dataTask(with: url!, completionHandler: { (data, response, error) in
+            if error != nil {
+                print(error!)
+                return
+            }
+            DispatchQueue.main.async {
+                
+                let imageToCache = UIImage(data: data!)
+                
+                if self.imageUrlString == urlString {
+                    self.image = imageToCache
+                }
+                
+                imageCache.setObject(imageToCache!, forKey: urlString as NSString)
+                
+                
+            }
+            
+        }).resume()
+    }
+
 }

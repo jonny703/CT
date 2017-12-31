@@ -1,9 +1,9 @@
 //
 //  Message.swift
-//  gameofchats
+//  CT
 //
-//  Created by PAC on 4/6/17.
-//  Copyright © 2017 PAC. All rights reserved.
+//  Created by John Nik on 4/6/17.
+//  Copyright © 2017 johnik703. All rights reserved.
 //
 
 import UIKit
@@ -23,13 +23,7 @@ class Message: NSObject {
     
     func chatPartnerId() -> String? {
         
-        return fromId == FIRAuth.auth()?.currentUser?.uid ? toId : fromId
-        
-//        if fromId == FIRAuth.auth()?.currentUser?.uid {
-//            return toId
-//        } else {
-//            return fromId
-//        }
+        return fromId == Auth.auth().currentUser?.uid ? toId : fromId
     }
     
     init(dictionary: [String: AnyObject]) {

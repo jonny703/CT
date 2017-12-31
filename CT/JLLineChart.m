@@ -358,13 +358,13 @@
                     self.indicatePoint.frame = CGRectMake(item.x - 3.0f, item.y - 3.0f, 6.0f, 6.0f);
                     
                     if (item.x <= self.chartMarginLeft + 35.0f) {
-                        self.dateLabel.frame = CGRectMake(self.chartMarginLeft, self.chartMarginTop - 15.0f, 100.0f, 15.0f);
+                        self.dateLabel.frame = CGRectMake(self.chartMarginLeft, self.chartMarginTop - 15.0f, 150.0f, 15.0f);
                     }
                     else if (item.x >= self.bounds.size.width - 35.0f - self.chartMarginRight)
                     {
-                        self.dateLabel.frame = CGRectMake(self.bounds.size.width - self.chartMarginRight - 100.0f, self.chartMarginTop - 15.0f, 70.0f, 15.0f);
+                        self.dateLabel.frame = CGRectMake(self.bounds.size.width - self.chartMarginRight - 120.0f, self.chartMarginTop - 15.0f, 150.0f, 15.0f);
                     }else{
-                        self.dateLabel.frame = CGRectMake(item.x - 35.0f, self.chartMarginTop - 15.0f, 100.0f, 15.0f);
+                        self.dateLabel.frame = CGRectMake(item.x - 35.0f, self.chartMarginTop - 15.0f, 150.0f, 15.0f);
                     }
                     _dateLabel.text = item.rawX;
                     if (item.x <= self.bounds.size.width/2.0f) {
